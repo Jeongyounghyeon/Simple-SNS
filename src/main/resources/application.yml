@@ -22,3 +22,4 @@ spring:
 jwt:
   secret-key: simple-sns-application-secret-key
   token.expired-time-ms: 5292000000  # 30?
+
