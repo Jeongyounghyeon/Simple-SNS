@@ -114,4 +114,51 @@ class PostServiceTest {
         SimpleSnsException e = assertThrows(SimpleSnsException.class, () -> postService.modify(title, body, username, postId));
         assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
     }
+
+    @Test
+    public void 포스트삭제가_성공한경우() {
+        String username = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        // mocking
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        assertDoesNotThrow(() -> postService.delete(username, postId));
+    }
+
+    @Test
+    public void 포스트삭제시_포스트가_존재하지_않는_경우() {
+        String username = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        // mocking
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+
+        SimpleSnsException e = assertThrows(SimpleSnsException.class, () -> postService.delete(username, postId));
+        assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    public void 포스트삭제시_권한이_없는_경우() {
+        String username = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+        UserEntity writer = UserEntityFixture.get("username1", "password", 1);
+
+        // mocking
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(writer));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        SimpleSnsException e = assertThrows(SimpleSnsException.class, () -> postService.delete(username, postId));
+        assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+    }
 }
