@@ -1,0 +1,7 @@
+FROM postgres:latest
+
+ENV POSTGRES_USER=simple-sns
+ENV POSTGRES_PASSWORD=0000
+ENV POSTGRES_DB=simple-sns
+
+EXPOSE 5432
