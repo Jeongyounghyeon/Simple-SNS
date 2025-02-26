@@ -18,3 +18,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 4
+
+jwt:
+  secret-key: simple-sns-application-secret-key
+  token.expired-time-ms: 5292000000  # 30?
