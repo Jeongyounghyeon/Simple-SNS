@@ -35,7 +35,7 @@ class UserServiceTest {
         String username = "username";
         String password = "password";
 
-        UserEntity fixture = UserEntityFixture.get(username, password);
+        UserEntity fixture = UserEntityFixture.get(username, password, 1);
 
         // mocking
         when(userEntityRepository.findByUsername(username)).thenReturn(Optional.empty());
@@ -50,7 +50,7 @@ class UserServiceTest {
         String username = "username";
         String password = "password";
 
-        UserEntity fixture = UserEntityFixture.get(username, password);
+        UserEntity fixture = UserEntityFixture.get(username, password, 1);
 
         // mocking
         when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(fixture));
@@ -66,7 +66,7 @@ class UserServiceTest {
         String username = "username";
         String password = "password";
 
-        UserEntity fixture = UserEntityFixture.get(username, password);
+        UserEntity fixture = UserEntityFixture.get(username, password, 1);
 
         // mocking
         when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(fixture));
@@ -93,7 +93,7 @@ class UserServiceTest {
         String password = "password";
         String wrongPassword = "wrongPassword";
 
-        UserEntity fixture = UserEntityFixture.get(username, password);
+        UserEntity fixture = UserEntityFixture.get(username, password, 1);
 
         // mocking
         when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(fixture));
