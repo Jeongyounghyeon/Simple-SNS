@@ -1,20 +1,19 @@
 package com.study.simple_sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.study.simple_sns.controller.request.PostCommentRequest;
 import com.study.simple_sns.controller.request.PostCreateRequest;
 import com.study.simple_sns.controller.request.PostModifyRequest;
 import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
 import com.study.simple_sns.filxture.PostEntityFixture;
 import com.study.simple_sns.model.Post;
-import com.study.simple_sns.model.entity.PostEntity;
 import com.study.simple_sns.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -251,5 +250,37 @@ class PostControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser
+    public void 댓글기능() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void 댓글작성시_로그인하지_않은_경우() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    public void 댓글작성시_게시물이_없는경우() throws Exception {
+        doThrow(new SimpleSnsException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any(), any());
+
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                ).andDo(print())
+                .andExpect(status().isNotFound());
     }
 }
