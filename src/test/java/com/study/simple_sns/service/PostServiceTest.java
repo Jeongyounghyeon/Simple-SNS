@@ -1,15 +1,14 @@
 package com.study.simple_sns.service;
 
-import com.study.simple_sns.SimpleSnsApplication;
 import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
 import com.study.simple_sns.filxture.PostEntityFixture;
 import com.study.simple_sns.filxture.UserEntityFixture;
 import com.study.simple_sns.model.entity.PostEntity;
 import com.study.simple_sns.model.entity.UserEntity;
+import com.study.simple_sns.repository.LikeEntityRepository;
 import com.study.simple_sns.repository.PostEntityRepository;
 import com.study.simple_sns.repository.UserEntityRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,8 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class PostServiceTest {
@@ -35,6 +33,9 @@ class PostServiceTest {
 
     @MockitoBean
     private UserEntityRepository userEntityRepository;
+
+    @MockitoBean
+    private LikeEntityRepository likeEntityRepository;
 
     @Test
     public void 포스트작성이_성공한경우() {
@@ -182,5 +183,45 @@ class PostServiceTest {
         when(postEntityRepository.findAllByUser(userEntity, pageable)).thenReturn(Page.empty());
 
         assertDoesNotThrow(() -> postService.my("", pageable));
+    }
+
+    @Test
+    public void 좋아요_요청이_성공한_경우() throws Exception {
+        Integer postId = 1;
+        String username = "username";
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(mock(UserEntity.class)));
+        when(likeEntityRepository.existsByUserAndPost(any(), any())).thenReturn(false);
+
+        assertDoesNotThrow(() -> postService.like(postId, username));
+    }
+
+    @Test
+    public void 좋아요_요청시_게시물이_없는경우() throws Exception {
+        Integer postId = 1;
+        String username = "username";
+
+        doThrow(new SimpleSnsException(ErrorCode.POST_NOT_FOUND)).when(postEntityRepository).findById(postId);
+
+        SimpleSnsException e = assertThrows(SimpleSnsException.class, () -> postService.like(postId, username));
+        assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    public void 좋아요_요청시_이미_좋아요를_누른_게시물인_경우() throws Exception {
+        Integer postId = 1;
+        String username = "username";
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(mock(UserEntity.class)));
+        when(likeEntityRepository.existsByUserAndPost(any(), any())).thenReturn(true);
+
+        SimpleSnsException e = assertThrows(SimpleSnsException.class, () -> postService.like(postId, username));
+        assertEquals(ErrorCode.ALREADY_LIKED, e.getErrorCode());
     }
 }

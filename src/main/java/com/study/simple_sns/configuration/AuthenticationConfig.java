@@ -28,6 +28,11 @@ public class AuthenticationConfig {
     private String key;
 
     @Bean
+    WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(regexMatcher("^(?!/api/).*"));
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(httpRequest ->
