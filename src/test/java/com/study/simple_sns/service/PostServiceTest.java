@@ -4,8 +4,10 @@ import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
 import com.study.simple_sns.filxture.PostEntityFixture;
 import com.study.simple_sns.filxture.UserEntityFixture;
+import com.study.simple_sns.model.entity.AlarmEntity;
 import com.study.simple_sns.model.entity.PostEntity;
 import com.study.simple_sns.model.entity.UserEntity;
+import com.study.simple_sns.repository.AlarmEntityRepository;
 import com.study.simple_sns.repository.LikeEntityRepository;
 import com.study.simple_sns.repository.PostEntityRepository;
 import com.study.simple_sns.repository.UserEntityRepository;
@@ -36,6 +38,9 @@ class PostServiceTest {
 
     @MockitoBean
     private LikeEntityRepository likeEntityRepository;
+
+    @MockitoBean
+    private AlarmEntityRepository alarmEntityRepository;
 
     @Test
     public void 포스트작성이_성공한경우() {
@@ -195,6 +200,7 @@ class PostServiceTest {
         when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
         when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(mock(UserEntity.class)));
         when(likeEntityRepository.existsByUserAndPost(any(), any())).thenReturn(false);
+        when(alarmEntityRepository.save(any())).thenReturn(mock(AlarmEntity.class));
 
         assertDoesNotThrow(() -> postService.like(postId, username));
     }

@@ -2,12 +2,17 @@ package com.study.simple_sns.service;
 
 import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
+import com.study.simple_sns.model.Alarm;
 import com.study.simple_sns.model.User;
+import com.study.simple_sns.model.entity.AlarmEntity;
 import com.study.simple_sns.model.entity.UserEntity;
+import com.study.simple_sns.repository.AlarmEntityRepository;
 import com.study.simple_sns.repository.UserEntityRepository;
 import com.study.simple_sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret-key}")
@@ -58,5 +64,11 @@ public class UserService {
         String token = JwtTokenUtils.generateToken(username, secretKey, expiredTimeMs);
 
         return token;
+    }
+
+    public Page<Alarm> alarmList(String username, Pageable pageable) {
+        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new SimpleSnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+
+        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(Alarm::fromEntity);
     }
 }
