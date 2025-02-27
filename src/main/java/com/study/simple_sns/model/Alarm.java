@@ -8,7 +8,6 @@ import java.sql.Timestamp;
 @Value
 public class Alarm {
     Integer id;
-    User user;
     AlarmType alarmType;
     AlarmArgs args;
     Timestamp registeredAt;
@@ -18,7 +17,6 @@ public class Alarm {
     public static Alarm fromEntity(AlarmEntity entity) {
         return new Alarm(
                 entity.getId(),
-                User.fromEntity(entity.getUser()),
                 entity.getAlarmType(),
                 entity.getArgs(),
                 entity.getRegisteredAt(),
