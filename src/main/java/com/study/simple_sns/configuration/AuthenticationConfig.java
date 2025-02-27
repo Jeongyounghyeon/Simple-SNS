@@ -31,6 +31,7 @@ public class AuthenticationConfig {
                         httpRequest
                                 .requestMatchers("/api/*/users/join", "/api/*/users/login").permitAll()
                                 .requestMatchers("/api/**").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement
