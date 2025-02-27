@@ -2,15 +2,14 @@ package com.study.simple_sns.service;
 
 import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
-import com.study.simple_sns.model.AlarmArgs;
-import com.study.simple_sns.model.AlarmType;
-import com.study.simple_sns.model.Comment;
-import com.study.simple_sns.model.Post;
+import com.study.simple_sns.model.*;
 import com.study.simple_sns.model.entity.*;
 import com.study.simple_sns.repository.*;
+import com.study.simple_sns.util.ClassUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,7 +89,7 @@ public class PostService {
         alarmEntityRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
     }
 
-    public int likeCount(Integer postId) {
+    public long likeCount(Integer postId) {
         // post exist
         PostEntity postEntity = getPostEntityOrException(postId);
 
