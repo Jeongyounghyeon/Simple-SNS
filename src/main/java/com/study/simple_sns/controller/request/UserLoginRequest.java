@@ -6,7 +6,7 @@ import lombok.Value;
 @Value
 public class UserLoginRequest {
 
-    @JsonProperty("userName")
+    @JsonProperty("name")
     String username;
 
     @JsonProperty("password")
