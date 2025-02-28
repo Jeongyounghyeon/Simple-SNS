@@ -1,0 +1,37 @@
+version: '3.8'
+
+name: simple-sns
+
+services:
+  redis:
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: simple-sns-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - simple-sns
+
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: simple-sns-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - simple-sns
+
+volumes:
+  redis-data:
+  postgres-data:
+
+networks:
+  simple-sns:
