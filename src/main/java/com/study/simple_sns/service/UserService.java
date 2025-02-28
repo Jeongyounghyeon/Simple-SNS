@@ -4,9 +4,9 @@ import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
 import com.study.simple_sns.model.Alarm;
 import com.study.simple_sns.model.User;
-import com.study.simple_sns.model.entity.AlarmEntity;
 import com.study.simple_sns.model.entity.UserEntity;
 import com.study.simple_sns.repository.AlarmEntityRepository;
+import com.study.simple_sns.repository.UserCacheRepository;
 import com.study.simple_sns.repository.UserEntityRepository;
 import com.study.simple_sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ public class UserService {
 
     private final UserEntityRepository userEntityRepository;
     private final AlarmEntityRepository alarmEntityRepository;
+    private final UserCacheRepository userCacheRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret-key}")
@@ -32,9 +33,11 @@ public class UserService {
     private Long expiredTimeMs;
 
     public User loadUserByUsername(String username) {
-        return userEntityRepository.findByUsername(username)
-                .map(User::fromEntity)
-                .orElseThrow(() -> new SimpleSnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+        return userCacheRepository.getUser(username).orElseGet(() ->
+                userEntityRepository.findByUsername(username)
+                        .map(User::fromEntity)
+                        .orElseThrow(() -> new SimpleSnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)))
+        );
     }
 
     @Transactional
@@ -52,11 +55,12 @@ public class UserService {
     @Transactional
     public String login(String username, String password) {
         // 회원가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new SimpleSnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+        User user = loadUserByUsername(username);
+        userCacheRepository.setUser(user);
 
         // 비밀번호 체크
 
-        if (!encoder.matches(password, userEntity.getPassword())) {
+        if (!encoder.matches(password, user.getPassword())) {
             throw new SimpleSnsException(ErrorCode.INVALID_PASSWORD);
         }
 

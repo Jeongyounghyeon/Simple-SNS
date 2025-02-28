@@ -4,6 +4,7 @@ import com.study.simple_sns.exception.ErrorCode;
 import com.study.simple_sns.exception.SimpleSnsException;
 import com.study.simple_sns.filxture.UserEntityFixture;
 import com.study.simple_sns.model.entity.UserEntity;
+import com.study.simple_sns.repository.UserCacheRepository;
 import com.study.simple_sns.repository.UserEntityRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ class UserServiceTest {
 
     @MockitoBean
     private UserEntityRepository userEntityRepository;
+
+    @MockitoBean
+    UserCacheRepository userCacheRepository;
 
     @MockitoBean
     private BCryptPasswordEncoder encoder;
@@ -82,6 +86,7 @@ class UserServiceTest {
 
         // mocking
         when(userEntityRepository.findByUsername(username)).thenReturn(Optional.empty());
+        when(userCacheRepository.getUser(username)).thenReturn(Optional.empty());
 
         SimpleSnsException e = Assertions.assertThrows(SimpleSnsException.class, () -> userService.login(username, password));
         assertEquals(ErrorCode.USER_NOT_FOUND, e.getErrorCode());
